@@ -1,5 +1,9 @@
 # Navoice iOS SDK
 
+Version: 1.0.0  
+Platform: iOS  
+Distribution: XCFramework
+
 Voice-driven navigation SDK for iOS applications.
 
 Navoice enables users to control your app using natural language voice commands such as:
@@ -8,13 +12,17 @@ Navoice enables users to control your app using natural language voice commands 
 - “Show my subscriber number”
 
 The SDK returns structured navigation results — your app remains fully in control of UI and routing.
+Navoice is UI-agnostic.  
+It works with SwiftUI, UIKit, and hybrid applications.
 
 ---
 
 ## Requirements
 
+Navoice supports both SwiftUI and UIKit applications.
+
 - iOS 15+
-- SwiftUI or UIKit
+- SwiftUI or UIKit supported
 
 ---
 
@@ -84,15 +92,155 @@ struct MyApp: App {
 
 ---
 
-## Start Voice
+## UIKit Integration
+
+Navoice works with both SwiftUI and UIKit applications.
+
+If your app is built using UIKit, you can initialize and use Navoice in your AppDelegate, SceneDelegate, or root view controller.
+
+### Initialize in UIKit
+
+```swift
+import UIKit
+import NavoiceSDK
+
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    let navoice = Navoice(specResourceName: "mycity_spec")
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+
+        return true
+    }
+}
+```
+
+### Start Voice
 
 ```swift
 navoice.startVoice()
 ```
 
+### Full Result Handling Example
+
+```swift
+navoice.onResult = { result in
+    switch result {
+
+    case .execute(let screenId, let params, _, _, _):
+        handleNavigation(screenId, params)
+
+    case .present(let presentationId, let params, let say, _, _):
+        presentModal(id: presentationId, params: params)
+
+    case .showChoices:
+        showChoicesUI()
+
+    case .unsupported:
+        showUnsupportedUI()
+    }
+}
+```
+
+### Example Navigation (UIKit)
+
+```swift
+func handleNavigation(_ screenId: String, _ params: [String: Any]) {
+
+    switch screenId {
+
+    case "events":
+        navigationController?.pushViewController(EventsViewController(), animated: true)
+
+    case "education":
+        navigationController?.pushViewController(EducationViewController(), animated: true)
+
+    default:
+        break
+    }
+}
+```
+
+### Present Modal Example
+
+```swift
+func presentModal(id: String, params: [String: Any]) {
+
+    let vc = PublishableKeyViewController()
+    vc.modalPresentationStyle = .pageSheet
+    present(vc, animated: true)
+}
+```
+
 ---
 
-## Handle Results
+## UI Framework Support
+
+Navoice is UI-agnostic and works with:
+
+- SwiftUI
+- UIKit
+- Hybrid applications
+
+## Threading
+
+All Navoice callbacks are delivered on the main thread.
+
+You can safely update UI directly from `onResult`.
+
+## Minimal Example
+
+```swift
+navoice.onResult = { result in
+
+    switch result {
+
+    case .execute(let screenId, _, _, _, _):
+        print("Navigate to:", screenId)
+
+    case .present(let id, _, _, _, _):
+        print("Present:", id)
+
+    default:
+        break
+    }
+}
+
+navoice.startVoice()
+```
+
+## Handling Unsupported Commands
+
+```swift
+case .unsupported:
+    showUnsupportedUI()
+```
+
+## App Lifecycle
+
+Stop voice when app goes to background:
+
+```swift
+navoice.stopVoice()
+```
+
+Restart voice when needed.
+
+## Architecture
+
+Navoice is:
+
+- UI agnostic
+- Navigation agnostic
+- Spec driven
+- Cloud assisted
+
+---
+
+## SwiftUI Result Handling
 
 ```swift
 @EnvironmentObject var navoice: Navoice
