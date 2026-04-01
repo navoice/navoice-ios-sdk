@@ -1,76 +1,175 @@
 # Navoice iOS SDK
 
-Version: 1.0.0  
-Platform: iOS  
-Distribution: XCFramework
+**Version:** 1.0.0  
+**Platform:** iOS 15+  
+**Distribution:** XCFramework
 
-Voice-driven navigation SDK for iOS applications.
+Voice-driven navigation for iOS. Navoice turns spoken phrases into structured navigation results so your app can route users by voice—for example: “Open events”, “Go to education”, or “Show my subscriber number”.
 
-Navoice enables users to control your app using natural language voice commands such as:
-- “Open events”
-- “Go to education”
-- “Show my subscriber number”
+The SDK is **UI-agnostic**: it works with SwiftUI, UIKit, or mixed apps. **Your app owns navigation and UI**; Navoice focuses on speech, intent detection, and routing. **Callbacks are delivered on the main thread**, so you can update the interface directly from handlers such as `onResult`.
 
-The SDK returns structured navigation results — your app remains fully in control of UI and routing.
-Navoice is UI-agnostic.  
-It works with SwiftUI, UIKit, and hybrid applications.
+---
+
+## What’s in this repository
+
+This repository includes:
+
+- **`NavoiceSDK.xcframework`** — the Navoice iOS SDK, delivered as an **XCFramework** (prebuilt binary; no SDK source in the framework).
+- **`Navoice-MyCity`** — a demo iOS application that shows a complete integration pattern.
+
+> **Swift Package Manager:** The same SDK is also buildable from the Swift package sources in this repo (`Package.swift`). For most app integrations, linking the **XCFramework** is the recommended path.
+
+---
+
+## Demo application: Navoice-MyCity
+
+**Navoice-MyCity** is a reference iOS app shipped alongside the SDK. It is **disabled for real use until you configure your own project credentials** (publishable key and allowed bundle identifier). Out of the box it illustrates wiring, lifecycle, and result handling—not a production-ready tenant.
+
+### What the demo is for
+
+Use **Navoice-MyCity** to:
+
+- Study a **reference integration** end to end  
+- **Test** the SDK against your Navoice project  
+- Use as a **starting point** for a production integration (replace branding, navigation, and spec as needed)
+
+---
+
+## Setting up the demo app (Navoice-MyCity)
+
+1. **Open the Navoice-MyCity project** in Xcode (the demo target included in this repository).
+
+2. **Go to the Navoice Portal** (sign in with your organization’s Navoice account).
+
+3. **Open your project** in the portal.
+
+4. **Copy the Publishable Key** for that project.
+
+5. In Xcode, select the **Navoice-MyCity** app target → **Info** tab (or open the target’s **Info.plist**).
+
+6. Set **`NavoicePublishableKey`** to the key you copied (see [Configuration](#configuration-infoplist)).
+
+7. Still in the portal, on the **same project**, add your app’s **Bundle Identifier** under **Allowed Identifiers** (sometimes labeled similarly on the project page—allow-list for client apps).
+
+8. **Find your Bundle Identifier in Xcode:** select the app target → **General** → **Identity** → **Bundle Identifier**. It must **exactly match** the value you registered in the portal.
+
+9. Build and run on a device or simulator (microphone where required).
+
+**License validation:** the SDK validates the app using your publishable key and the **host app’s bundle ID**. If the bundle identifier is **not** registered under **Allowed Identifiers** for that project, **license validation will fail** and voice features will not work as expected.
 
 ---
 
 ## Requirements
 
-Navoice supports both SwiftUI and UIKit applications.
-
-- iOS 15+
-- SwiftUI or UIKit supported
-
----
-
-## Quick Start (2 Minutes)
-
-1. Add `NavoiceSDK.xcframework` to your project  
-2. Add your publishable key to `Info.plist`  
-3. Add your spec file  
-4. Initialize SDK  
-5. Call `startVoice()`
-
-Done.
+- **iOS 15** or later  
+- **Xcode** compatible with your chosen integration (SwiftUI and/or UIKit)  
+- Microphone access where you use voice input (see [Permissions](#permissions))
 
 ---
 
 ## Installation
 
-1. Drag `NavoiceSDK.xcframework` into your Xcode project  
-2. Make sure:
-   - **Add to target** is checked  
-   - **Embed & Sign** is selected  
+1. Add **`NavoiceSDK.xcframework`** to your Xcode project (drag into the Project Navigator, or **File → Add Files…**).
+
+2. In the target’s **Frameworks, Libraries, and Embedded Content** (or **General → Frameworks**):
+
+   - Add **NavoiceSDK**  
+   - Set embed to **Embed & Sign**
+
+3. **Import** in Swift:
+
+   ```swift
+   import NavoiceSDK
+   ```
 
 ---
 
-## Configuration
+## Quick start
 
-Add to **Info.plist**:
-
-```xml
-<key>NavoicePublishableKey</key>
-<string>YOUR_PUBLISHABLE_KEY</string>
-```
-
-Optional:
-
-```xml
-<key>NavoiceLocale</key>
-<string>en-US</string>
-
-<key>NavoiceSTTMode</key>
-<string>hybrid</string>
-```
-
-STT modes: `localOnly`, `cloudOnly`, `hybrid`, `disabled`
+1. Add **`NavoiceSDK.xcframework`** and embed **Embed & Sign**.  
+2. Add your **publishable key** and optional keys to **Info.plist** ([Configuration](#configuration-infoplist)).  
+3. Register your app’s **Bundle Identifier** under **Allowed Identifiers** in Navoice Portal.  
+4. Add your **navigation spec** JSON to the app bundle.  
+5. Create **`Navoice(specResourceName: "your_spec")`** (name without `.json`).  
+6. Set **`onResult`** and call **`startVoice()`** when you want listening to begin.
 
 ---
 
-## Initialize SDK
+## Configuration (Info.plist)
+
+Configure the SDK via your app’s **Info.plist** (target → **Info** or `Info.plist` source).
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `NavoicePublishableKey` | String | Yes | Publishable key from Navoice Portal → your project. |
+| `NavoiceLocale` | String | No | BCP 47 style locale (e.g. `en-US`). Defaults to `en-US` if omitted. |
+| `NavoiceSTTMode` | String | No | Speech-to-text strategy: `localOnly`, `cloudOnly`, `hybrid`, `disabled`. See [STT settings](#speech-to-text-stt-settings). |
+| `NavoiceLocalSTTMinConfidence` | Number (Real) | No | Minimum confidence for accepting **local** STT; affects **hybrid** fallback. Default in SDK: `0.65`. See [STT settings](#speech-to-text-stt-settings). |
+
+Optional advanced override (not required for typical integrations):
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `NavoiceBackendBaseURL` | String | Override API base URL (e.g. staging). Defaults to production. |
+
+### Example `Info.plist` fragment
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NavoicePublishableKey</key>
+	<string>YOUR_PUBLISHABLE_KEY</string>
+
+	<key>NavoiceLocale</key>
+	<string>en-US</string>
+
+	<key>NavoiceSTTMode</key>
+	<string>hybrid</string>
+
+	<key>NavoiceLocalSTTMinConfidence</key>
+	<real>0.65</real>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Voice commands require microphone access.</string>
+</dict>
+</plist>
+```
+
+Use your real **Publishable Key** and keep **Allowed Identifiers** in sync with your **Bundle Identifier**.
+
+---
+
+## Speech-to-text (STT) settings
+
+### A. `NavoiceSTTMode` (String)
+
+Controls how spoken audio is turned into text.
+
+| Value | Meaning |
+|-------|---------|
+| **`localOnly`** | Use on-device speech recognition only. No cloud STT. |
+| **`cloudOnly`** | Send audio to Navoice cloud STT (when supported by your configuration). |
+| **`hybrid`** | Prefer local recognition; if the local result is weak or missing, fall back to cloud STT when available. **Recommended** for a good balance of latency, privacy, and accuracy. |
+| **`disabled`** | Do not run STT in the SDK path that depends on this mode (useful when you only route typed text or custom pipelines). |
+
+**Recommendation:** set **`hybrid`** explicitly for most production apps. If you omit `NavoiceSTTMode`, the SDK defaults to **`localOnly`**.
+
+Values are matched case-insensitively (e.g. `cloudOnly` or `cloudonly`).
+
+### B. `NavoiceLocalSTTMinConfidence` (Number / Real)
+
+Sets the **minimum confidence** the SDK requires to **accept a local STT transcript** as good enough to route.
+
+- If local recognition confidence is **below** this threshold (or confidence is unavailable), the SDK **may fall back to cloud STT** when **`NavoiceSTTMode`** is **`hybrid`** (or when using paths that allow cloud fallback).
+- **`0.65`** is a **balanced default** (and matches the SDK’s built-in default when the key is omitted).
+- **Lower** values → more permissive (accept more local transcripts; less cloud fallback).
+- **Higher** values → stricter (more local rejects; more cloud fallback in hybrid mode, where allowed).
+
+---
+
+## Initialize the SDK
 
 ```swift
 import SwiftUI
@@ -90,157 +189,11 @@ struct MyApp: App {
 }
 ```
 
----
-
-## UIKit Integration
-
-Navoice works with both SwiftUI and UIKit applications.
-
-If your app is built using UIKit, you can initialize and use Navoice in your AppDelegate, SceneDelegate, or root view controller.
-
-### Initialize in UIKit
-
-```swift
-import UIKit
-import NavoiceSDK
-
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    let navoice = Navoice(specResourceName: "mycity_spec")
-
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
-
-        return true
-    }
-}
-```
-
-### Start Voice
-
-```swift
-navoice.startVoice()
-```
-
-### Full Result Handling Example
-
-```swift
-navoice.onResult = { result in
-    switch result {
-
-    case .execute(let screenId, let params, _, _, _):
-        handleNavigation(screenId, params)
-
-    case .present(let presentationId, let params, let say, _, _):
-        presentModal(id: presentationId, params: params)
-
-    case .showChoices:
-        showChoicesUI()
-
-    case .unsupported:
-        showUnsupportedUI()
-    }
-}
-```
-
-### Example Navigation (UIKit)
-
-```swift
-func handleNavigation(_ screenId: String, _ params: [String: Any]) {
-
-    switch screenId {
-
-    case "events":
-        navigationController?.pushViewController(EventsViewController(), animated: true)
-
-    case "education":
-        navigationController?.pushViewController(EducationViewController(), animated: true)
-
-    default:
-        break
-    }
-}
-```
-
-### Present Modal Example
-
-```swift
-func presentModal(id: String, params: [String: Any]) {
-
-    let vc = PublishableKeyViewController()
-    vc.modalPresentationStyle = .pageSheet
-    present(vc, animated: true)
-}
-```
+The `specResourceName` is the JSON file in your bundle **without** the `.json` suffix (e.g. `mycity_spec` → `mycity_spec.json`).
 
 ---
 
-## UI Framework Support
-
-Navoice is UI-agnostic and works with:
-
-- SwiftUI
-- UIKit
-- Hybrid applications
-
-## Threading
-
-All Navoice callbacks are delivered on the main thread.
-
-You can safely update UI directly from `onResult`.
-
-## Minimal Example
-
-```swift
-navoice.onResult = { result in
-
-    switch result {
-
-    case .execute(let screenId, _, _, _, _):
-        print("Navigate to:", screenId)
-
-    case .present(let id, _, _, _, _):
-        print("Present:", id)
-
-    default:
-        break
-    }
-}
-
-navoice.startVoice()
-```
-
-## Handling Unsupported Commands
-
-```swift
-case .unsupported:
-    showUnsupportedUI()
-```
-
-## App Lifecycle
-
-Stop voice when app goes to background:
-
-```swift
-navoice.stopVoice()
-```
-
-Restart voice when needed.
-
-## Architecture
-
-Navoice is:
-
-- UI agnostic
-- Navigation agnostic
-- Spec driven
-- Cloud assisted
-
----
-
-## SwiftUI Result Handling
+## SwiftUI integration
 
 ```swift
 @EnvironmentObject var navoice: Navoice
@@ -262,29 +215,182 @@ Navoice is:
 }
 ```
 
+Start and stop voice when it fits your UX:
+
+```swift
+navoice.startVoice()
+navoice.stopVoice()
+```
+
+---
+
+## UIKit integration
+
+Navoice works with **UIKit** apps: initialize in `AppDelegate`, `SceneDelegate`, or a long-lived owner (e.g. root coordinator), then call `startVoice()` / `stopVoice()` from view controllers.
+
+### Initialize (example: `AppDelegate`)
+
+```swift
+import UIKit
+import NavoiceSDK
+
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    let navoice = Navoice(specResourceName: "mycity_spec")
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        return true
+    }
+}
+```
+
+### Start voice
+
+```swift
+navoice.startVoice()
+```
+
+---
+
+## Result handling
+
+Set **`onResult`** once (or when your root UI appears). Handle each `NavoiceResult` case and perform navigation / modals in **your** code.
+
+### Full example (UIKit-style handlers)
+
+```swift
+navoice.onResult = { result in
+    switch result {
+
+    case .execute(let screenId, let params, _, _, _):
+        handleNavigation(screenId, params)
+
+    case .present(let presentationId, let params, let say, _, _):
+        presentModal(id: presentationId, params: params)
+
+    case .showChoices:
+        showChoicesUI()
+
+    case .unsupported:
+        showUnsupportedUI()
+    }
+}
+```
+
+### Example navigation
+
+```swift
+func handleNavigation(_ screenId: String, _ params: [String: Any]) {
+
+    switch screenId {
+
+    case "events":
+        navigationController?.pushViewController(EventsViewController(), animated: true)
+
+    case "education":
+        navigationController?.pushViewController(EducationViewController(), animated: true)
+
+    default:
+        break
+    }
+}
+```
+
+### Present modal example
+
+```swift
+func presentModal(id: String, params: [String: Any]) {
+
+    let vc = PublishableKeyViewController()
+    vc.modalPresentationStyle = .pageSheet
+    present(vc, animated: true)
+}
+```
+
 ---
 
 ## Result types
 
-| Result | Description |
-|--------|---------|
-| `execute` | Navigate to a screen |
-| `present` | Show modal / sheet |
-| `showChoices` | Multiple intents detected |
-| `unsupported` | No matching intent |
+| Case | Description |
+|------|-------------|
+| `execute` | Navigate to a screen (your app pushes/presents the destination). |
+| `present` | Show a modal or sheet (your app presents the UI). |
+| `showChoices` | Multiple intents detected; prompt the user to choose. |
+| `unsupported` | No matching intent (show help or fallback UX). |
 
+---
 
+## Threading
 
-## Navigation Spec
+**All Navoice callbacks (including `onResult`) are delivered on the main thread** (main actor). You can update SwiftUI state and UIKit views directly inside those closures.
 
-Add a JSON spec file to your app bundle (for example: `mycity_spec.json`).
+---
 
-Defines:
-- screens
-- keywords
-- examples
+## Minimal example
 
-Example:
+```swift
+navoice.onResult = { result in
+
+    switch result {
+
+    case .execute(let screenId, _, _, _, _):
+        print("Navigate to:", screenId)
+
+    case .present(let id, _, _, _, _):
+        print("Present:", id)
+
+    default:
+        break
+    }
+}
+
+navoice.startVoice()
+```
+
+---
+
+## Handling unsupported commands
+
+```swift
+case .unsupported:
+    showUnsupportedUI()
+```
+
+---
+
+## App lifecycle
+
+Stop voice when the app moves to the background (or when your UX requires it):
+
+```swift
+navoice.stopVoice()
+```
+
+Restart listening when the user returns to a context where voice is appropriate.
+
+---
+
+## Architecture
+
+Navoice is:
+
+- **UI-agnostic** — no required Navoice screens; you supply UI.  
+- **Navigation-agnostic** — you map results to your stack, tabs, or coordinators.  
+- **Spec-driven** — behavior is driven by your bundled JSON navigation spec.  
+- **Cloud-assisted** — license, semantic routing, and optional cloud STT interact with Navoice services.
+
+---
+
+## Navigation spec
+
+Add a JSON spec to your app bundle (e.g. **`mycity_spec.json`**) and pass `specResourceName: "mycity_spec"`.
+
+The spec defines screens, keywords, examples, and routing metadata your project expects.
+
+**Minimal shape:**
 
 ```json
 {
@@ -297,11 +403,13 @@ Example:
 }
 ```
 
+Use the spec exported or managed for your Navoice project in the portal where applicable.
+
 ---
 
 ## Permissions
 
-Add to **Info.plist**:
+Add a microphone usage string so iOS can show the system prompt:
 
 ```xml
 <key>NSMicrophoneUsageDescription</key>
@@ -310,7 +418,7 @@ Add to **Info.plist**:
 
 ---
 
-## Voice Lifecycle
+## Voice lifecycle
 
 ```swift
 navoice.startVoice()
@@ -319,7 +427,9 @@ navoice.stopVoice()
 
 ---
 
-## Text Routing
+## Text routing
+
+You can route typed or programmatic text through the same pipeline:
 
 ```swift
 let result = try await navoice.route(text: "show my subscriber number")
@@ -327,45 +437,67 @@ let result = try await navoice.route(text: "show my subscriber number")
 
 ---
 
-## UI Integration
+## UI integration notes
 
-You can:
-- Use built-in components (optional)
-- Build your own UI
-- Trigger voice programmatically
+You may:
+
+- Use **optional** SDK UI helpers (e.g. mic affordances) where provided  
+- **Build your own** controls and call `startVoice()` / `stopVoice()` yourself  
+- Trigger voice **programmatically** from buttons or gestures  
+
+The SDK does not replace your design system—it **emits results**; you **render** the experience.
+
+---
 
 ## Responsibilities
 
-**SDK handles:**
-- Speech recognition
-- Intent detection
-- Routing
-- License validation
+**SDK**
 
-**Your app handles:**
-- Navigation
-- UI
-- User experience
+- Speech recognition (per `NavoiceSTTMode`)  
+- Intent detection and routing  
+- License validation  
+- Communication with Navoice backends as needed  
+
+**Your app**
+
+- **Navigation and UI**  
+- Presenting sheets, tabs, and deep links  
+- Microphone permission UX and product copy  
+
+---
 
 ## Security
 
-- Uses publishable key
-- License validated via backend
-- Short-lived tokens for protected APIs
+- Integration uses a **publishable** key (safe for client apps).  
+- **License** is validated server-side against your project and **bundle identifier**.  
+- Short-lived tokens are used for protected API calls where applicable.
 
-## Binary Distribution
+---
 
-- Delivered as `XCFramework`
-- No source code included
-- Integrated like any native iOS framework
+## Binary distribution
 
-## Production Checklist
+- Shipped as **`NavoiceSDK.xcframework`**.  
+- **No** SDK source inside the framework binary.  
+- Integrates like any other native iOS XCFramework (**Embed & Sign**).
 
-- [ ] XCFramework added (Embed & Sign)
-- [ ] Publishable key configured
-- [ ] Spec file added
-- [ ] SDK initialized
-- [ ] Result handling implemented
+---
+
+## Production checklist
+
+- [ ] **`NavoiceSDK.xcframework`** added and set to **Embed & Sign**  
+- [ ] **`NavoicePublishableKey`** set in **Info.plist**  
+- [ ] App **Bundle Identifier** registered under **Allowed Identifiers** in Navoice Portal  
+- [ ] **`NavoiceSTTMode`** chosen (recommend **`hybrid`**) and **`NavoiceLocalSTTMinConfidence`** tuned if needed  
+- [ ] Navigation **spec** JSON added to the bundle  
+- [ ] SDK **initialized** with correct `specResourceName`  
+- [ ] **`onResult`** implemented for all relevant cases  
+- [ ] **`NSMicrophoneUsageDescription`** present  
+- [ ] **Background / foreground** behavior tested (`stopVoice` / `startVoice` as needed)
+
+---
 
 ## Support
-contact@navoice.io
+
+**Email:** contact@navoice.io  
+
+For portal access, keys, and **Allowed Identifiers**, use **Navoice Portal** → your **project** settings.
