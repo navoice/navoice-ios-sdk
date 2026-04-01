@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NavoiceLocalSTTMinConfidence</key>
+	<real>0.65000000000000002</real>
+	<key>NavoiceLocale</key>
+	<string>en-US</string>
+	<key>NavoicePublishableKey</key>
+	<string>pk_4b5871c2f598ef0ef121f3821ba3ba504c3e2967f32dce86</string>
+	<key>NavoiceSTTMode</key>
+	<string>hybrid</string>
+</dict>
+</plist>
