@@ -39,7 +39,15 @@ struct RootTabsView: View {
     @State private var textInput: String = ""
     @State private var textInputHint: String? = nil
     @FocusState private var isTextFieldFocused: Bool
+    @State private var showMissingKeyAlert = false
+    
+    private var hasPublishableKey: Bool {
+        let key = (Bundle.main.infoDictionary?["NavoicePublishableKey"] as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
+        return !key.isEmpty && key != "MISSING_PUBLISHABLE_KEY"
+    }
+    
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .bottomTrailing) {
@@ -67,11 +75,21 @@ struct RootTabsView: View {
                 voiceBarView(bottomSafe: proxy.safeAreaInsets.bottom)
                     .padding(.trailing, 16)
                     .padding(.bottom, 8 + proxy.safeAreaInsets.bottom)
+                
+                    .alert("Missing Publishable Key", isPresented: $showMissingKeyAlert) {
+                        Button("OK", role: .cancel) {}
+                    } message: {
+                        Text("Please configure NavoicePublishableKey in Info.plist to enable voice and text routing.")
+                    }
             }
             .onAppear {
-                
                 bindNavoiceIfNeeded()
+                print("DEBUG hasPublishableKey = \(hasPublishableKey)")
+                print("DEBUG plist key = \(Bundle.main.infoDictionary?["NavoicePublishableKey"] ?? "nil")")
                 
+                if !hasPublishableKey {
+                    showMissingKeyAlert = true
+                }
             }
             .sheet(item: $presentationPresenter.pendingPresentation) { presentation in
                 PresentationSheetView(presentation: presentation) {
@@ -99,6 +117,10 @@ struct RootTabsView: View {
     /// Blue circular pencil button – toggles text input mode. Shown regardless of mic permission.
     private var pencilButton: some View {
         Button {
+            if !hasPublishableKey {
+                showMissingKeyAlert = true
+                return
+            }
             withAnimation {
                 isTextInputMode = true
                 textInputHint = nil
@@ -214,6 +236,10 @@ struct RootTabsView: View {
     }
 
     private func submitTextInput() {
+        if !hasPublishableKey {
+            showMissingKeyAlert = true
+            return
+        }
         let text = textInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
             textInputHint = "Enter something to send"
@@ -322,6 +348,10 @@ struct RootTabsView: View {
     // MARK: - Mic actions (STT: capture audio → routeAudio)
 
     private func micButtonTapped() {
+        if !hasPublishableKey {
+            showMissingKeyAlert = true
+            return
+        }
         bindNavoiceIfNeeded()
 
         switch micState {
