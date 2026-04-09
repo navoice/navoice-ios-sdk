@@ -227,6 +227,8 @@ navoice.stopVoice()
 ```
 
 ## Floating microphone button (SwiftUI)
+
+```swift
 @State private var isListening = false
 
 Button(action: {
@@ -235,6 +237,7 @@ Button(action: {
     } else {
         navoice.startVoice()
     }
+
     isListening.toggle()
 }) {
     Image(systemName: isListening ? "mic.fill" : "mic")
@@ -244,8 +247,6 @@ Button(action: {
         .background(isListening ? Color.red : Color.blue)
         .clipShape(Circle())
 }
-```
-
 ---
 
 ## UIKit integration
