@@ -247,6 +247,7 @@ Button(action: {
         .background(isListening ? Color.red : Color.blue)
         .clipShape(Circle())
 }
+```
 ---
 
 ## UIKit integration
