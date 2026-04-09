@@ -133,6 +133,9 @@ Optional advanced override (not required for typical integrations):
 
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Voice commands require microphone access.</string>
+ 
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Navoice uses speech recognition to enable voice navigation</string>   
 </dict>
 </plist>
 ```
@@ -194,6 +197,7 @@ The `specResourceName` is the JSON file in your bundle **without** the `.json` s
 ---
 
 ## SwiftUI integration
+Navigation handling is implemented by your app. Navoice only returns routing results (execute / present). This applies to both SwiftUI and UIKit apps.
 
 ```swift
 @EnvironmentObject var navoice: Navoice
@@ -220,6 +224,26 @@ Start and stop voice when it fits your UX:
 ```swift
 navoice.startVoice()
 navoice.stopVoice()
+```
+
+## Floating microphone button (SwiftUI)
+@State private var isListening = false
+
+Button(action: {
+    if isListening {
+        navoice.stopVoice()
+    } else {
+        navoice.startVoice()
+    }
+    isListening.toggle()
+}) {
+    Image(systemName: isListening ? "mic.fill" : "mic")
+        .font(.system(size: 24))
+        .foregroundColor(.white)
+        .frame(width: 64, height: 64)
+        .background(isListening ? Color.red : Color.blue)
+        .clipShape(Circle())
+}
 ```
 
 ---
@@ -492,6 +516,7 @@ The SDK does not replace your design system—it **emits results**; you **render
 - [ ] SDK **initialized** with correct `specResourceName`  
 - [ ] **`onResult`** implemented for all relevant cases  
 - [ ] **`NSMicrophoneUsageDescription`** present  
+- [ ] NSSpeechRecognitionUsageDescription present
 - [ ] **Background / foreground** behavior tested (`stopVoice` / `startVoice` as needed)
 
 ---
