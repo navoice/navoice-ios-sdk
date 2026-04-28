@@ -102,7 +102,7 @@ Configure the SDK via your app’s **Info.plist** (target → **Info** or `Info.
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `NavoicePublishableKey` | String | Yes | Publishable key from Navoice Portal → your project. |
-| `NavoiceLocale` | String | No | BCP 47 style locale (e.g. `en-US`). Defaults to `en-US` if omitted. |
+| `NavoiceLocale` | String | No | BCP 47 style locale (e.g. `en-US`) or `auto` for multilingual detection. Defaults to `en-US` if omitted. |
 | `NavoiceSTTMode` | String | No | Speech-to-text strategy: `localOnly`, `cloudOnly`, `hybrid`, `disabled`. See [STT settings](#speech-to-text-stt-settings). |
 | `NavoiceLocalSTTMinConfidence` | Number (Real) | No | Minimum confidence for accepting **local** STT; affects **hybrid** fallback. Default in SDK: `0.65`. See [STT settings](#speech-to-text-stt-settings). |
 
@@ -123,7 +123,7 @@ Optional advanced override (not required for typical integrations):
 	<string>YOUR_PUBLISHABLE_KEY</string>
 
 	<key>NavoiceLocale</key>
-	<string>en-US</string>
+	<string>auto</string>
 
 	<key>NavoiceSTTMode</key>
 	<string>hybrid</string>
@@ -170,6 +170,14 @@ Sets the **minimum confidence** the SDK requires to **accept a local STT transcr
 - **Lower** values → more permissive (accept more local transcripts; less cloud fallback).
 - **Higher** values → stricter (more local rejects; more cloud fallback in hybrid mode, where allowed).
 
+### Multilingual STT and language=auto
+
+For multilingual apps, use **`NavoiceLocale = auto`**.
+
+- This is required for mixed Hebrew/English voice input.
+- Do not hardcode `en-US` or `he-IL` when the app supports multiple languages.
+- `auto` allows the SDK pipeline to detect and route mixed-language utterances.
+
 ---
 
 ## Initialize the SDK
@@ -212,8 +220,11 @@ Navigation handling is implemented by your app. Navoice only returns routing res
         case .present(let presentationId, let params, let say, _, _):
             presentSheet(id: presentationId, params: params, say: say)
 
-        case .showChoices, .unsupported:
-            handleFailure()
+        case .showChoices:
+            showChoicesUI()
+
+        case .unsupported:
+            handleUnsupported()
         }
     }
 }
@@ -305,6 +316,13 @@ navoice.onResult = { result in
     }
 }
 ```
+
+### Catalog-aware handling guidance
+
+- `execute` with `screenId == "catalogItemDetails"` means a catalog item was found.
+- Demo apps may show **“Item Found”**.
+- Production apps should navigate to the real item details page using `params`.
+- `showChoices` means the client must show a popup/list and map the selected option to a catalog item.
 
 ### Example navigation
 
@@ -408,6 +426,10 @@ Navoice is:
 - **Spec-driven** — behavior is driven by your bundled JSON navigation spec.  
 - **Cloud-assisted** — license, semantic routing, and optional cloud STT interact with Navoice services.
 
+Pipeline:
+
+**STT → Normalize → Local Router → Semantic Tasks → Semantic Catalog → Cloud fallback**
+
 ---
 
 ## Navigation spec
@@ -430,6 +452,49 @@ The spec defines screens, keywords, examples, and routing metadata your project 
 ```
 
 Use the spec exported or managed for your Navoice project in the portal where applicable.
+
+### Multilingual spec guidance
+
+- `default_locale` should support multilingual setups (for example `he-IL` + `en-US`).
+- `languageByLocale` should be removed or set to `"auto"`.
+
+---
+
+## Semantic Catalog
+
+Semantic Catalog handles dynamic catalog content such as movies, products, courses, and articles.
+
+- It is separate from navigation.
+- Navigation intent has priority over catalog.
+- Strong catalog match returns `execute`.
+- Multiple possible catalog matches return `showChoices`.
+- Weak catalog matches are rejected so catalog does not hijack navigation queries.
+
+---
+
+## Semantic Catalog Setup (Portal)
+
+1. Open project in Navoice Portal.
+2. Connect catalog JSON URL.
+3. Run scan.
+4. Map fields such as `id`, `title`, `description`, `image`, `keywords`.
+5. Save catalog.
+6. Latest saved catalog becomes active.
+
+---
+
+## Runtime Flow
+
+1. Local Spec routing
+2. Semantic Tasks
+3. Semantic Catalog
+4. Cloud Interpret fallback
+
+---
+
+## Cross-platform note
+
+This behavior is aligned across iOS, Web, and Android.
 
 ---
 
