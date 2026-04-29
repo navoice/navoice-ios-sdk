@@ -2,8 +2,8 @@
   "version": "1.0",
   "app": {
     "id": "mycity",
-    "default_locale": "en-US",
-    "locales": ["en-US"]
+    "default_locale": "he-IL",
+    "locales": ["he-IL", "en-US"]
   },
   "routing": {
     "weights": {
@@ -101,7 +101,8 @@
   "stt": {
     "enabled": true,
     "languageByLocale": {
-      "en-US": "en"
+      "en-US": "auto",
+      "he-IL": "auto"
     },
     "promptsByLocale": {
       "en-US": "Transcribe clearly for a city-services voice navigation app. Keep intent words. Return one short sentence."

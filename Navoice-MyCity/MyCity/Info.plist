@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>NavoiceLocalSTTMinConfidence</key>
-	<real>0.65</real>
+	<real>0.65000000000000002</real>
 	<key>NavoiceLocale</key>
 	<string>en-US</string>
 	<key>NavoicePublishableKey</key>
-	<string>MISSING_PUBLISHABLE_KEY</string>
+	<string></string>
 	<key>NavoiceSTTMode</key>
 	<string>hybrid</string>
 </dict>

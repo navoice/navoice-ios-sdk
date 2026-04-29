@@ -9,16 +9,6 @@
 import SwiftUI
 import NavoiceSDK
 
-
-
-//final class Navoice: ObservableObject {
-//    init(specResourceName: String) {
-//        // No-op fallback
-//        _ = specResourceName
-//    }
-//}
-
-
 /// App metadata and constants used across the app.
 struct AppInfo {
     static let cityName: String = "MyCity"
@@ -40,5 +30,9 @@ struct MyCityApp: App {
         }
     }
 }
+
+
+
+
 
 

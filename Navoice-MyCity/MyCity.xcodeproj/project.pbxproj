@@ -6,13 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AED35D432FA125260098C946 /* NavoiceSDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = AED35D412FA125180098C946 /* NavoiceSDK.xcframework */; };
+		AED35D442FA125260098C946 /* NavoiceSDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AED35D412FA125180098C946 /* NavoiceSDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
-		AEDF4F302F7C3A5A008126E6 /* Embed Frameworks */ = {
+		AEF96B282F6F2FAA0004711A /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				AED35D442FA125260098C946 /* NavoiceSDK.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -21,6 +27,7 @@
 
 /* Begin PBXFileReference section */
 		AECAF4052F3505DA00BF1B72 /* MyCity.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyCity.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AED35D412FA125180098C946 /* NavoiceSDK.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = NavoiceSDK.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -33,25 +40,11 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		AE76992F2F7C70EC006D55D3 /* Exceptions for "MyCity" folder in "Embed Frameworks" phase from "MyCity" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			attributesByRelativePath = {
-				NavoiceSDK.xcframework = (CodeSignOnCopy, RemoveHeadersOnCopy, );
-			};
-			buildPhase = AEDF4F302F7C3A5A008126E6 /* Embed Frameworks */;
-			membershipExceptions = (
-				NavoiceSDK.xcframework,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AECAF4072F3505DA00BF1B72 /* MyCity */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				AE06D48F2F3635310004B521 /* Exceptions for "MyCity" folder in "MyCity" target */,
-				AE76992F2F7C70EC006D55D3 /* Exceptions for "MyCity" folder in "Embed Frameworks" phase from "MyCity" target */,
 			);
 			path = MyCity;
 			sourceTree = "<group>";
@@ -63,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AED35D432FA125260098C946 /* NavoiceSDK.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,8 +66,8 @@
 		AECAF3FC2F3505DA00BF1B72 = {
 			isa = PBXGroup;
 			children = (
+				AED35D412FA125180098C946 /* NavoiceSDK.xcframework */,
 				AECAF4072F3505DA00BF1B72 /* MyCity */,
-				AEDF4F2D2F7C3A5A008126E6 /* Frameworks */,
 				AECAF4062F3505DA00BF1B72 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -86,13 +80,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AEDF4F2D2F7C3A5A008126E6 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -103,7 +90,7 @@
 				AECAF4012F3505DA00BF1B72 /* Sources */,
 				AECAF4022F3505DA00BF1B72 /* Frameworks */,
 				AECAF4032F3505DA00BF1B72 /* Resources */,
-				AEDF4F302F7C3A5A008126E6 /* Embed Frameworks */,
+				AEF96B282F6F2FAA0004711A /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -215,6 +202,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/MyCity/**";
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -279,6 +267,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/MyCity/**";
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -307,10 +296,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 73LBHZ8K9Q;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/**",
-					"$(PROJECT_DIR)/MyCity/**",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/MyCity";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MyCity/Info.plist;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "MyCity uses the microphone for voice navigation (e.g. \"Take me to education\").";
@@ -325,6 +311,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Navoice.MyCity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -348,10 +335,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 73LBHZ8K9Q;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/**",
-					"$(PROJECT_DIR)/MyCity/**",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/MyCity";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MyCity/Info.plist;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "MyCity uses the microphone for voice navigation (e.g. \"Take me to education\").";
@@ -366,6 +350,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Navoice.MyCity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
