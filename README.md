@@ -483,6 +483,100 @@ Semantic Catalog handles dynamic catalog content such as movies, products, cours
 
 ---
 
+## Semantic Catalog Result Structure
+
+Catalog search results may now include a `params.display` object alongside `params.itemId`. This generic display object carries human-readable fields extracted from your catalog data, so client applications can present rich item information without hardcoding domain-specific logic.
+
+**Example result:**
+
+```json
+{
+  "kind": "execute",
+  "screenId": "catalogItemDetails",
+  "params": {
+    "itemId": "TITL0000000000000027",
+    "display": {
+      "title": "The Shawshank Redemption",
+      "actors": [
+        "Tim Robbins",
+        "Morgan Freeman"
+      ],
+      "image": "https://...",
+      "description": "Two imprisoned men bond over a number of years..."
+    }
+  }
+}
+```
+
+---
+
+## Generic Display Fields
+
+In the Navoice Portal, you can define `displayFields` in your Semantic Catalog mapping. These fields are extracted dynamically from `semantic_items.raw` at query time and returned in `params.display`.
+
+**Example mapping:**
+
+```json
+"displayFields": {
+  "title": "title",
+  "actors": "credits.actors",
+  "image": "media[].url",
+  "description": "synopsis"
+}
+```
+
+This mechanism works for any catalog domain:
+
+- Movies and TV series
+- Products and e-commerce catalogs
+- Restaurants
+- Documents
+- Real estate listings
+- Medical providers (e.g. dentists, doctors)
+- Any custom JSON catalog
+
+---
+
+## Client Rendering Recommendations
+
+Use the following fallback order when choosing a human-readable label from a catalog result:
+
+1. `params.display.title`
+2. `params.display.name`
+3. `params.display.label`
+4. `params.itemId`
+
+This covers common catalog domains:
+
+- Movies → `title`
+- Products → `name`
+- Generic items → `label`
+- Final fallback → `itemId`
+
+**Swift example:**
+
+```swift
+let display = result.params["display"] as? [String: Any]
+let label =
+    (display?["title"] as? String) ??
+    (display?["name"] as? String) ??
+    (display?["label"] as? String) ??
+    (result.params["itemId"] as? String) ??
+    ""
+```
+
+---
+
+## Backward Compatibility
+
+- `params.itemId` remains unchanged — existing integrations continue to work without modification.
+- `params.display` is **optional and additive**; it will not appear if no `displayFields` are configured.
+- Applications that do not need richer presentation may safely ignore `params.display`.
+- No database migration, catalog re-save, or catalog re-sync is required.
+- Existing `semantic_items.raw` data is used to populate display fields dynamically at query time.
+
+---
+
 ## Runtime Flow
 
 1. Local Spec routing
