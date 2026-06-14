@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.3.1 (swiftlang-6.3.1.1.2 clang-2100.0.123.102)
+// swift-compiler-version: Apple Swift version 6.3.2 (swiftlang-6.3.2.1.108 clang-2100.1.1.101)
 // swift-module-flags: -target arm64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 6 -O -enable-experimental-feature DebugDescriptionMacro -module-name NavoiceSDK -package-name sdk_ios
-// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.1
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.2
 import AVFoundation
 @_exported import Combine
 import DeveloperToolsSupport
@@ -102,6 +102,8 @@ public struct RouteResponse : Swift.Codable, Swift.Sendable {
   public let params: [Swift.String : Swift.String]?
   public let plan: [NavoiceSDK.RouteResponse.PlanStep]?
   public let choices: [NavoiceSDK.RouteResponse.Choice]?
+  public var reason: Swift.String?
+  public var requiredPlan: Swift.String?
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -274,6 +276,7 @@ public enum NavoiceResult : Swift.Sendable, Swift.Equatable {
   case present(presentationId: Swift.String, params: [Swift.String : Swift.String], say: Swift.String?, confidence: Swift.Double?, taskId: Swift.String?)
   case showChoices(say: Swift.String, choices: [NavoiceSDK.NavoiceChoice])
   case unsupported(say: Swift.String)
+  case planRestricted(reason: Swift.String, requiredPlan: Swift.String)
   public static func == (a: NavoiceSDK.NavoiceResult, b: NavoiceSDK.NavoiceResult) -> Swift.Bool
 }
 public struct NavoiceRouteTimings : Swift.Sendable {
